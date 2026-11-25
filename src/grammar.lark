@@ -1,0 +1,22 @@
+start: declaration* value
+declaration: _GLOBAL declared_name value
+?declared_name: NAME "=" | REM_DECL -> rem_name
+?referenced_name: NAME "}" | REM_REF -> rem_name
+
+?value: INTEGER                -> integer
+      | "[" [value (";" value)*] "]" -> array
+      | "${" referenced_name    -> reference
+
+_GLOBAL: /global(?![_a-zA-Z0-9])/
+INTEGER: /[+-]?\d+/
+NAME: /[_a-zA-Z][_a-zA-Z0-9]*/
+REM_DECL.3: _REM_WITH_GAP "="
+REM_REF.3: _REM_WITH_GAP "}"
+_REM_WITH_GAP: /REM(?![_a-zA-Z0-9])/ (/[ \t\f\r\n]/ | BLOCK_COMMENT | LINE_COMMENT)*
+LINE_COMMENT.2: /(?<![_a-zA-Z0-9])REM(?![_a-zA-Z0-9])[^\r\n]*+/
+BLOCK_COMMENT: /(?>#=(?s:.*?)=#)/
+
+%import common.WS
+%ignore WS
+%ignore LINE_COMMENT
+%ignore BLOCK_COMMENT
